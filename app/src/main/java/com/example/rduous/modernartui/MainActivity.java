@@ -29,6 +29,10 @@ public class MainActivity extends ActionBarActivity {
 
     static final String URL = "http://MoMA.org";
 
+    final static int[] coloredRectangleIds = new int[] {R.id.bottomLeft, R.id.bottomCenter, R.id.bottomRight,
+                R.id.centerRight, R.id.topRight};
+
+
 
 
     @Override
@@ -40,18 +44,8 @@ public class MainActivity extends ActionBarActivity {
         final int crColor = getResources().getColor(R.color.app_black);
         final int trColor = getResources().getColor(R.color.app_red);
 
-        final Map<Integer, Integer> colorChanges = new HashMap<>();
-        colorChanges.put(getResources().getColor(R.color.app_blue), getResources().getColor(R.color.app_red));
-        colorChanges.put(getResources().getColor(R.color.app_red), getResources().getColor(R.color.app_black));
-        colorChanges.put(getResources().getColor(R.color.app_black), getResources().getColor(R.color.app_yellow));
-        colorChanges.put(getResources().getColor(R.color.app_yellow), getResources().getColor(R.color.app_blue));
-
-
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.container, new PlaceholderFragment())
-//                    .commit();
         }
 
         bottomLeft = (FrameLayout) findViewById(R.id.bottomLeft);
@@ -60,16 +54,19 @@ public class MainActivity extends ActionBarActivity {
         centerRight = (FrameLayout) findViewById(R.id.centerRight);
         topRight = (FrameLayout) findViewById(R.id.topRight);
 
+
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //change color by progress
-                bottomLeft.setBackgroundColor(interpolateColor(blColor, colorChanges.get(blColor), progress/100f));
-                bottomCenter.setBackgroundColor(interpolateColor(bcColor, colorChanges.get(bcColor), progress/100f));
-                bottomRight.setBackgroundColor(interpolateColor(brColor, colorChanges.get(brColor), progress/100f));
-                centerRight.setBackgroundColor(interpolateColor(crColor, colorChanges.get(crColor), progress/100f));
-                topRight.setBackgroundColor(interpolateColor(trColor, colorChanges.get(trColor), progress/100f));
+
+                float p = progress/100f;
+                bottomLeft.setBackgroundColor(mutateColor(blColor, p));
+                bottomCenter.setBackgroundColor(mutateColor(bcColor, p));
+                bottomRight.setBackgroundColor(mutateColor(brColor, p));
+                centerRight.setBackgroundColor(mutateColor(crColor, p));
+                topRight.setBackgroundColor(mutateColor(trColor, p));
             }
 
             @Override
@@ -82,20 +79,13 @@ public class MainActivity extends ActionBarActivity {
 
             }
 
-            /** Returns an interpoloated color, between <code>a</code> and <code>b</code> */
-            private int interpolateColor(int a, int b, float proportion) {
-                float[] hsva = new float[3];
-                float[] hsvb = new float[3];
-                Color.colorToHSV(a, hsva);
-                Color.colorToHSV(b, hsvb);
-                for (int i = 0; i < 3; i++) {
-                    hsvb[i] = interpolate(hsva[i], hsvb[i], proportion);
+            private int mutateColor(int baseColor, float proportion) {
+                float[] hsv = new float[3];
+                Color.colorToHSV(baseColor, hsv);
+                for (int i=0; i<3; i++) {
+                    hsv[i] =  hsv[i] *  (1 - proportion/(5)) ;
                 }
-                return Color.HSVToColor(hsvb);
-            }
-
-            private float interpolate(float a, float b, float proportion) {
-                return (a + ((b - a) * proportion));
+                return Color.HSVToColor(hsv);
             }
         });
 
@@ -152,20 +142,4 @@ public class MainActivity extends ActionBarActivity {
                 .create();
             }
     }
-
-//    /**
-//     * A placeholder fragment containing a simple view.
-//     */
-//    public static class PlaceholderFragment extends Fragment {
-//
-//        public PlaceholderFragment() {
-//        }
-//
-//        @Override
-//        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-//                                 Bundle savedInstanceState) {
-//            View rootView = inflater.inflate(R.layout.activity_main, container, false);
-//            return rootView;
-//        }
-//    }
 }
