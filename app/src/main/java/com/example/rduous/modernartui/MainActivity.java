@@ -6,6 +6,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -14,59 +16,36 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
     private SeekBar seekBar;
-    private FrameLayout bottomLeft;
-    private FrameLayout bottomCenter;
-    private FrameLayout bottomRight;
-    private FrameLayout centerRight;
-    private FrameLayout topRight;
 
     static final String URL = "http://MoMA.org";
 
     final static int[] coloredRectangleIds = new int[] {R.id.bottomLeft, R.id.bottomCenter, R.id.bottomRight,
                 R.id.centerRight, R.id.topRight};
 
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final int blColor = getResources().getColor(R.color.app_blue);
-        final int bcColor = getResources().getColor(R.color.app_red);
-        final int brColor = getResources().getColor(R.color.app_yellow);
-        final int crColor = getResources().getColor(R.color.app_black);
-        final int trColor = getResources().getColor(R.color.app_red);
-
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-        }
 
-        bottomLeft = (FrameLayout) findViewById(R.id.bottomLeft);
-        bottomCenter = (FrameLayout) findViewById(R.id.bottomCenter);
-        bottomRight = (FrameLayout) findViewById(R.id.bottomRight);
-        centerRight = (FrameLayout) findViewById(R.id.centerRight);
-        topRight = (FrameLayout) findViewById(R.id.topRight);
-
+        final List<FrameLayout> frames = getColoredRectangles();
+        final int[] baseColors = getDefaultColors(frames);
 
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //change color by progress
-
                 float p = progress/100f;
-                bottomLeft.setBackgroundColor(mutateColor(blColor, p));
-                bottomCenter.setBackgroundColor(mutateColor(bcColor, p));
-                bottomRight.setBackgroundColor(mutateColor(brColor, p));
-                centerRight.setBackgroundColor(mutateColor(crColor, p));
-                topRight.setBackgroundColor(mutateColor(trColor, p));
+                for (int i=0; i<frames.size(); i++) {
+                    FrameLayout frame = frames.get(i);
+                    frame.setBackgroundColor(mutateColor(baseColors[i],p));
+                }
             }
 
             @Override
@@ -88,10 +67,31 @@ public class MainActivity extends ActionBarActivity {
                 return Color.HSVToColor(hsv);
             }
         });
-
-
     }
 
+    private int[] getDefaultColors(List<FrameLayout> frames) {
+        int[] defaultColors = new int[frames.size()];
+        int i = 0;
+        for(FrameLayout frame : frames) {
+            ColorDrawable background = (ColorDrawable) frame.getBackground();
+            defaultColors[i] =background.getColor();
+            i++;
+        }
+        return defaultColors;
+    }
+
+    private List<FrameLayout> getColoredRectangles() {
+        List<FrameLayout> frames = new ArrayList<>();
+        int app_white = getResources().getColor(R.color.app_white);
+        for (int id : coloredRectangleIds) {
+            FrameLayout rectangle = (FrameLayout) findViewById(id);
+            ColorDrawable background = (ColorDrawable) rectangle.getBackground();
+            if (background.getColor() != app_white) {
+                frames.add(rectangle);
+            }
+        }
+        return frames;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
